@@ -8,6 +8,7 @@
 * `do-what-it-says`
 
 */
+
 //load the npm packages to read and write
 var Twitter = require('twitter');
 var spotify = require('spotify');
@@ -40,7 +41,9 @@ switch (action) {
 }
 
 function myTweets(){
-    //This will show your last 20 tweets and when they were created at in your terminal/bash window.
+    /*This will show your last 20 tweets and when they were created at in your terminal/bash window.
+    */
+
     var client = new Twitter({
       consumer_key: keys.twitterKeys.consumer_key,
       consumer_secret: keys.twitterKeys.consumer_secret,
