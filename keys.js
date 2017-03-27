@@ -1,3 +1,4 @@
+//verify that the file is loaded, remove when completed
 console.log('this is loaded');
 
 exports.twitterKeys = {

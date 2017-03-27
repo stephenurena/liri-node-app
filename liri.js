@@ -12,6 +12,7 @@
 var Twitter = require('twitter');
 var spotify = require('spotify');
 var request = require('request');
+var keys = require('./keys.js');
 
 //take two arguments
 //The first wil lbe the action(my-tweets, spotify-this-song, movie-this, do-what-it-says)
@@ -40,7 +41,19 @@ switch (action) {
 
 function myTweets(){
     //This will show your last 20 tweets and when they were created at in your terminal/bash window.
-    console.log("tweets");
+    var client = new Twitter({
+      consumer_key: keys.twitterKeys.consumer_key,
+      consumer_secret: keys.twitterKeys.consumer_secret,
+      access_token_key: keys.twitterKeys.access_token_key,
+      access_token_secret: keys.twitterKeys.access_token_secret
+    });
+
+    var params = {screen_name: 'nodejs'};
+    client.get('statuses/user_timeline', params, function(error, tweets, response) {
+      if (!error) {
+    console.log(tweets);
+  }
+});
 }
 
 function spotifyThisSong(){
