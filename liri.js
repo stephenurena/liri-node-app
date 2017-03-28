@@ -14,6 +14,12 @@ var Twitter = require('twitter');
 var spotify = require('spotify');
 var request = require('request');
 var keys = require('./keys.js');
+    var client = new Twitter({
+      consumer_key: keys.twitterKeys.consumer_key,
+      consumer_secret: keys.twitterKeys.consumer_secret,
+      access_token_key: keys.twitterKeys.access_token_key,
+      access_token_secret: keys.twitterKeys.access_token_secret
+    });
 
 //take two arguments
 //The first wil lbe the action(my-tweets, spotify-this-song, movie-this, do-what-it-says)
@@ -43,20 +49,20 @@ switch (action) {
 function myTweets(){
     /*This will show your last 20 tweets and when they were created at in your terminal/bash window.
     */
+    var params = {count: 20};
 
-    var client = new Twitter({
-      consumer_key: keys.twitterKeys.consumer_key,
-      consumer_secret: keys.twitterKeys.consumer_secret,
-      access_token_key: keys.twitterKeys.access_token_key,
-      access_token_secret: keys.twitterKeys.access_token_secret
-    });
+     client.get('statuses/user_timeline', params, function(error, tweets, response){
+          if (!error) {
+               for (var i = 0; i < tweets.length; i++) {
+                    console.log(tweets[i].text + " Created on: " + tweets[i].created_at);
+                    // fs.appendFile('log.txt', tweets[i].text + " Created on: " + tweets[i].created_at + "\n");
+               }
+               // fs.appendFile('log.txt', "=================================================================");
+          } else {
+               console.log(error);
+          }
+     });
 
-    var params = {screen_name: 'nodejs'};
-    client.get('statuses/user_timeline', params, function(error, tweets, response) {
-      if (!error) {
-    console.log(tweets);
-  }
-});
 }
 
 function spotifyThisSong(){
