@@ -70,7 +70,15 @@ function spotifyThisSong(){
     * if no song is provided then your program will default to
     * "The Sign" by Ace of Base
     */
-    console.log("spotify");
+    spotify.search({ type: 'track', query: 'dancing in the moonlight' }, function(err, data) {
+    if ( err ) {
+        console.log('Error occurred: ' + err);
+        return;
+    }
+ 
+    // Do something with 'data' 
+    console.log(data);
+});
 }
 
 function movieThis(){
