@@ -12,6 +12,7 @@ var fs = require("fs");
 var action = process.argv[2];
 var value = process.argv[3];
 
+ 
 //Created a switch-case statement, will direct which function gets run.
 switch (action) {
     //if user inputs my-tweets, it will run the function myTweets, to find my latest 20 tweets
@@ -33,6 +34,10 @@ switch (action) {
   case "do-what-it-says":
     doWhatItSays();
     break;
+
+  //if user does not enter a task, default by printing some instructions:
+  default:
+    console.log("Woothere, don't you want to see awesomeness?" + "\nPlease enter one of the following commands:" + '\n"my-tweets", "spotify-this-song", "movie-this", or "do-what-it-says"');
 }
 
 //function called if user inputs my-tweets on process.argv[2], this will show users last 20 tweets,
@@ -54,17 +59,15 @@ function myTweets(){
     var params = {count: 20};
 
 
-     client.get('statuses/user_timeline', params, function(error, tweets, response){
+     client.get('statuses/user_timeline', params, function(error, tweets){
         //if not a success, will print last 20 tweets
           if (!error) {
                for (var i = 0; i < tweets.length; i++) {
-                    console.log(tweets[i].text + " Created on: " + tweets[i].created_at);
+                    console.log("\n==================Tweet# " + i + "===========================\n" + "My Tweet: " + tweets[i].text + " \nCreated on: " + moment(tweets[i].created_at).format('MMMM Do YYYY, h:mm a') + "\n");
 
                     //will also log the tweets into log.txt file, will not overwrite, just append on every new call.
-                    fs.appendFile('log.txt', "\n=============================================\n" + "Tweet " + tweets[i].text + " Created on: " + moment(tweets[i].created_at).format('MMMM Do YYYY, h:mm a') + "\n=============================================\n");
-                    console.log("\n=============================================\n");
+                    fs.appendFile('log.txt', "\n==================Tweet# " + i + "===========================\n" + "My Tweet: " + tweets[i].text + " \nCreated on: " + moment(tweets[i].created_at).format('MMMM Do YYYY, h:mm a') + "\n");
                }
-               // fs.appendFile('log.txt', "=================================================================");
 
                //or else will print an error
           } else {
@@ -76,22 +79,11 @@ function myTweets(){
 
 //function called if user inputs spotify-this-song on process.argv[2], will print album information.
 function spotifyThisSong(){
-    /*
-    * This will show the following information about the song in your terminal/bash window
-    * Artist(s)
-    * The song's name
-    * A preview link of the song from Spotify
-    * The album that the song is from
-
-    * if no song is provided then your program will default to
-    * "The Sign" by Ace of Base
-    */
-
     //default the query to song name "All the small things", by Blink-182, if user does not input a song on process.argv[3].
     query = "All the small things";
 
     //if user does enter a song name it will pass the query to the spotify.search
-    if(value != undefined){
+    if(value != undefined || null){
         query = value;
     }
     spotify.search({ type: 'track', query: query }, function(err, data) {
@@ -109,6 +101,8 @@ function spotifyThisSong(){
         console.log("Spotify song url: " + data.tracks.items[0].preview_url);
         console.log("Album title: " + data.tracks.items[0].album.name)
         console.log("\n=============================================\n");
+
+        fs.appendFile('log.txt',"\n====================Spotify this song!=======================\n" + "Artist name: " + data.tracks.items[0].artists[0].name + "\nSong name: " + data.tracks.items[0].name + "\nSpotify song url: " + data.tracks.items[0].preview_url + "\nAlbum title: " + data.tracks.items[0].album.name + "\n============================================================\n")
     });
 
 }
@@ -137,7 +131,7 @@ function movieThis(){
      query = "Mr. Nobody";
 
      //if user does enter a movie name on process.argv[3], will pass the  query to the request function.
-     if (value !== undefined) {
+     if (value !== undefined || null) {
           query = value;
      }
      request('http://www.omdbapi.com/?t=' + query + "&tomatoes=true", function (error, response, body) {
@@ -156,7 +150,7 @@ function movieThis(){
                console.log("\n=============================================\n");
 
                //will log movie information into the log.txt file, will append data when function is called.
-               fs.appendFile('log.txt',"\n=============================================\n" + "Title: " + movieData.Title + "\n" + "Year: " + movieData.Year + "\n" + "IMDB Rating: " + movieData.imdbRating + "\n" + "Country: " + movieData.Country + "\n" + "Language: " + movieData.Language + "\n" + "Plot: " + movieData.Plot + "\n" + "Actors: " + movieData.Actors + "\n" + "Rotten Tomatoes Rating: " + movieData.Ratings[1].Value + "\n" + "Rotten Tomatoes URL: " + movieData.tomatoURL + "\n=============================================\n");
+               fs.appendFile('log.txt',"\n====================OMBD Movie title info=======================\n" + "Title: " + movieData.Title + "\n" + "Year: " + movieData.Year + "\n" + "IMDB Rating: " + movieData.imdbRating + "\n" + "Country: " + movieData.Country + "\n" + "Language: " + movieData.Language + "\n" + "Plot: " + movieData.Plot + "\n" + "Actors: " + movieData.Actors + "\n" + "Rotten Tomatoes Rating: " + movieData.Ratings[1].Value + "\n" + "Rotten Tomatoes URL: " + movieData.tomatoURL + "\n=============================================\n");
           }
           else {
                console.log(error);
@@ -166,24 +160,38 @@ function movieThis(){
 
 //function called when user inputs do-What-It-Says, will run spotify-this-song, and pass the text in the random.txt file.
 function doWhatItSays() {
-    /*
-    Using the fs Node package, LIRI will take the text inside of random.txt and then use it to call one of LIRI's commands.
-It should run spotify-this-song for "I Want it That Way," as follows the text in random.txt.
-Feel free to change the text in that document to test out the feature for other commands.
-*/
     //will pass the text from random.txt, using the fs.readFile function, created above as a global.
     fs.readFile("random.txt", "utf8", function(error, data) {
         //if there is an error will print an error
         if(error){
             console.log(error);
         }
-        //if a success will print the data 
-        else {
-            var query = data;
-            spotifyThisSong();
+        //if a success create an array queryArr, that will hold the action, and song query
+            var queryArr = data.split(",");
 
-            console.log(data);
-        }
+            //assigned query to queryArr[1], to pass into spotify search.
+            query = queryArr[1];
+
+      spotify.search({ type: 'track', query: query }, function(err, data) {
+
+          //if the search is not a success, will print an error.
+          if ( err ) {
+              console.log('Woops, somthing happened bro! ' + err);
+              return;
+          }
+
+          //This will print, Artist Name, Song Name, Spotify song URL and album title.
+          console.log("\n====================Spotify this song!======================\n");
+          console.log("Artist name: " + data.tracks.items[0].artists[0].name);
+          console.log("Song name: " + data.tracks.items[0].name);
+          console.log("Spotify song url: " + data.tracks.items[0].preview_url);
+          console.log("Album title: " + data.tracks.items[0].album.name)
+          console.log("\n============================================================\n");
+
+          fs.appendFile('log.txt',"\n====================-Random Spotify this song!=======================\n" + "\nArtist name: " + data.tracks.items[0].artists[0].name + "\nSong name: " + data.tracks.items[0].name + "\nSpotify song url: " + data.tracks.items[0].preview_url + "\nAlbum title: " + data.tracks.items[0].album.name + "\n============================================================\n")
+      });
+
+            
     });
     
 }
